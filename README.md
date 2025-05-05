@@ -33,8 +33,8 @@ voice-recorder/
 
 1. Clone the repository:
 ```
-git clone <repository-url>
-cd <repository-directory>
+git clone https://github.com/szeyu/self-recorded-voice-dataset.git
+cd self-recorded-voice-dataset
 ```
 
 2. Install dependencies:
