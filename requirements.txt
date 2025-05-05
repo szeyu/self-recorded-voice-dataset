@@ -1,0 +1,7 @@
+streamlit
+pandas
+numpy
+sounddevice
+datasets
+huggingface_hub
+wave
