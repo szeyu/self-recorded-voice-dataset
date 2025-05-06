@@ -125,22 +125,30 @@ def delete_recording(df, index, csv_path):
         audio_filename = df.loc[index, "audio"]
         if audio_filename and not pd.isna(audio_filename):
             audio_path = os.path.join("audio_files", audio_filename)
-            
-            # Delete the audio file
-            if delete_audio_file(audio_path):
-                # Update the DataFrame
-                df_copy = df.copy()
-                df_copy.loc[index, "audio"] = None
-                df_copy.loc[index, "recorded"] = False
-                
-                # Save the updated DataFrame
-                if save_data(df_copy, csv_path):
-                    logger.info(f"Recording deleted for text index {index}")
-                    return True, df_copy
-            
-            return False, df
+
+            # Attempt to delete the audio file, but proceed regardless
+            deleted_file = delete_audio_file(audio_path)
+            if not deleted_file:
+                logger.warning(f"Associated audio file was not found or couldn't be deleted: {audio_path}. Proceeding with CSV update.")
+
+            # Update the DataFrame regardless of file deletion success
+            df_copy = df.copy()
+            df_copy.loc[index, "audio"] = None
+            df_copy.loc[index, "recorded"] = False
+
+            # Save the updated DataFrame
+            if save_data(df_copy, csv_path):
+                logger.info(f"Recording entry cleared for text index {index}")
+                return True, df_copy
+            else:
+                logger.error(f"Failed to save CSV after clearing recording for index {index}")
+                return False, df # Return original df if save failed
         else:
-            logger.warning(f"No audio file to delete for index {index}")
+            # Handle cases where the CSV already shows no recording (no change needed)
+            logger.warning(f"CSV indicates no recording to delete for index {index}")
+            # It's arguably successful in the sense that the state is correct
+            # Return True so the UI can reflect success? Or False because no action was taken?
+            # Let's return False as no change was made to the CSV.
             return False, df
     except Exception as e:
         logger.error(f"Error deleting recording: {e}")
