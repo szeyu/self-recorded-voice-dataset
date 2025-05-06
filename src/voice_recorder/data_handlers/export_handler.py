@@ -41,14 +41,22 @@ def export_dataset(input_csv, audio_dir, output_dir):
         logger.info(f"Making audio paths absolute relative to: {audio_dir}")
         df["audio"] = df["audio"].apply(lambda x: os.path.join(audio_dir, x))
         
-        # Save to CSV in the output directory
-        output_csv_path = os.path.join(output_dir, "dataset.csv")
-        logger.info(f"Saving filtered data to CSV: {output_csv_path}")
-        df.to_csv(output_csv_path, index=False)
+        # Select only the required columns for the final dataset
+        logger.info("Selecting only 'text' and 'audio' columns for the final dataset.")
+        if "text" not in df.columns:
+            logger.error("'text' column not found in the input CSV. Cannot proceed with column selection.")
+            return False
+        df_final = df[["text", "audio"]]
         
-        # Create Hugging Face dataset
-        logger.info("Creating Hugging Face Dataset object from DataFrame.")
-        dataset = Dataset.from_pandas(df)
+        # Save to CSV in the output directory (optional: save df_final instead?)
+        # For now, keeping the original df for the CSV dump for potential debugging
+        output_csv_path = os.path.join(output_dir, "dataset.csv")
+        logger.info(f"Saving full filtered data (for reference) to CSV: {output_csv_path}")
+        df.to_csv(output_csv_path, index=False) # Save original df with all columns here
+        
+        # Create Hugging Face dataset from the selected columns
+        logger.info("Creating Hugging Face Dataset object from selected columns ('text', 'audio').")
+        dataset = Dataset.from_pandas(df_final) # Use df_final here
         
         # Cast audio column to Audio feature
         logger.info("Casting 'audio' column to Hugging Face Audio feature (sampling_rate=24000).")
