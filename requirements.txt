@@ -5,3 +5,5 @@ sounddevice
 datasets
 huggingface_hub
 wave
+getpass4
+requests

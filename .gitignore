@@ -6,3 +6,4 @@ data/
 my_voice_dataset/
 .cursorignore
 .cursorrules
+.env
